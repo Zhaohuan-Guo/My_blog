@@ -7,7 +7,7 @@ tags:
     - daily recording
 categories: blog
 description: The first attempt to configure the blog
-cover: /images/gf1.jpg
+cover: 
 ---
 
 

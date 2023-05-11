@@ -3,7 +3,7 @@ title: markdown using
 date: 2023-05-10 17:32:33
 tags:
     - markdown
-cover: /images/gf2.jpg
+cover: https://cdn.hashnode.com/res/hashnode/image/upload/v1605362981730/wDYGLi6rK.png
 ---
 
 markdown using introduction
