@@ -10,6 +10,7 @@ tags:
     - BST
     - mirror tree
 categories: data_structure
+cover: https://repository-images.githubusercontent.com/314091861/8c489d80-2ad2-11eb-96f0-9559eae37f57
 ---
 # 今日题目：35， 155， 643， 501， 101，268
 
