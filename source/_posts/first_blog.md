@@ -4,8 +4,8 @@ date: 2023-05-10 13:36:56
 tags:
     - share
     - blog
-    - daily recording
-categories: blog
+    - daily
+categories: daily_blog
 description: The first attempt to configure the blog
 cover: 
 ---
