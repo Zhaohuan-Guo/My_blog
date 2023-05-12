@@ -11,6 +11,11 @@
       avatar: https://gcore.jsdelivr.net/gh/CNhuazhu/Image/avatar.jpg
       descr: 佛系青年
       siteshot: https://gcore.jsdelivr.net/gh/CNhuazhu/Image/WPcover.png
+      
+    - name: Shizuku
+      link: https://shizukuyu.github.io/
+      avatar: https://i.postimg.cc/nh60zfGr/avatar.jpg
+      descr: 欢迎来我的空间踩踩
 
 - class_name: 網站
   class_desc: 值得推薦的網站
