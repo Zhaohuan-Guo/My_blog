@@ -90,7 +90,6 @@ cover:
     - /images/background4.jpg
     - /images/cover2.jpg
     - /images/cover3.jpg
-    - /images/cover4.jpg
 
 # Replace Broken Images (替換無法顯示的圖片)
 error_img:
