@@ -29,6 +29,7 @@ Output: 1
  
 二分插入可以递归和迭代，要会怎么递归转迭代：找到边界情况。
 二分插入简而言之就是有左边界，中间值，右边界，当不断二分，三个值为一个值的时候，就在那个位置插入值，边界条件就是left = right = mid
+
 代码：
 ```python
 class Solution:
@@ -113,6 +114,7 @@ Output: 12.75000
 Explanation: Maximum average is (12 - 5 - 6 + 50) / 4 = 51 / 4 = 12.75
 ```
 滑动窗口用来解决重复大量计算
+
 代码：
 ```python
 class Solution:
@@ -184,6 +186,7 @@ Output: [2]
 - curr_val变化的时候，curr_count变化。
 - curr_count > max_count 时候， modes清空。
 - curr_count == max_count 时候，入栈。
+
 代码：
 ```python
 from typing import Optional
