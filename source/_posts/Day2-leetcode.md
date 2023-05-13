@@ -4,11 +4,11 @@ date: 2023-05-13 16:15:44
 tags: 
     - data_structure
     - binary research
-    - stack
-    - sliding window
+    - linked list
+    - Double pointer
+    - Iterative method
     - tree
     - BST
-    - mirror tree
 categories: data_structure
 cover: https://repository-images.githubusercontent.com/314091861/8c489d80-2ad2-11eb-96f0-9559eae37f57
 mathjax: true
