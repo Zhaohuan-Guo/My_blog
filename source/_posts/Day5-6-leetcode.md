@@ -9,7 +9,9 @@ tags:
     - stack
     - hash_table
     - Iterative method
+categories: data_structure
 cover: https://repository-images.githubusercontent.com/314091861/8c489d80-2ad2-11eb-96f0-9559eae37f57
+mathjax: true
 ---
 # 两日题目：263，1，226，119，367，349，405，225，617，350，1971，590
 简单题都是基础题，基础也是学习的一个过程。图的题目都是相对较难的，要根据自己的理解去灵活处理图的题目。
