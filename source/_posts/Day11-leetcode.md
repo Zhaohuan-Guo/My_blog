@@ -6,7 +6,6 @@ tags:
     - double pointer
     - stack
     - hash_table
-    - linked list
 categories: data_structure
 cover: https://repository-images.githubusercontent.com/314091861/8c489d80-2ad2-11eb-96f0-9559eae37f57
 ---
@@ -210,7 +209,7 @@ class Solution:
 
 ```
 
-# 599
+# 599 哈希表
 题目：
 > Given two arrays of strings list1 and list2, find the common strings with the least index sum.
 A common string is a string that appeared in both list1 and list2.
