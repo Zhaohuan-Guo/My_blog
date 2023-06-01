@@ -2,6 +2,10 @@
 title: Day12-leetcode
 date: 2023-05-26 21:52:51
 tags:
+    - queue
+    - linked list 
+categories: data_structure
+cover: https://repository-images.githubusercontent.com/314091861/8c489d80-2ad2-11eb-96f0-9559eae37f57
 ---
 今天改变复习策略。
 对于leetcode的刷题要侧重于将python代码转化为js

@@ -1,5 +1,5 @@
 ---
-title: Vue-1-fondamental
+title: Vue-1-前置知识点
 date: 2023-05-29 16:39:45
 tags:
     - vue
@@ -367,6 +367,233 @@ CommonJS 规定：
 2. 如果目录里没有 package.json 文件，或者 main 入口不存在或无法解析，则 Node.js 将会试图加载目录下的 index.js 文件。
 3. 如果以上两步都失败了，则 Node.js 会在终端打印错误消息，报告模块的缺失：Error: Cannot find module 'xxx'
 
+# ES6模块化与异步编程高级用法
+## ES6 模块化
+## Promise
+### 1. 回调地狱
+多层回调函数的相互嵌套，就形成了回调地狱。
 
+- 代码耦合性太强，牵一发而动全身，难以维护
+- 大量冗余的代码相互嵌套，代码的可读性变差
+#### 1.1 如何解决回调地狱的问题
+为了解决回调地狱的问题，ES6（ECMAScript 2015）中新增了 Promise 的概念
+#### 1.2 Promise 的基本概念
+① **Promise 是一个构造函数**
+- 我们可以创建 Promise 的实例 const p = new Promise()
+- new 出来的 Promise 实例对象，代表一个异步操作
+② **Promise.prototype 上包含一个 .then() 方法**
+- 每一次 new Promise() 构造函数得到的实例对象，
+- 都可以通过**原型链**的方式访问到 .then() 方法，例如 **p.then()**
+③ **.then() 方法用来预先指定成功和失败的回调函数**
+- p.then(成功的回调函数，失败的回调函数)
+- p.then(**result => { }, error => { }**)
+- 调用 .then() 方法时，成功的回调函数是必选的、失败的回调函数是可选的
+  
+### 2. 基于回调函数按顺序读取文件内容
+```javascript
+fs.readFile('path', 'utf8', (err1, r1) => {
+  fs.readFile('path', 'utf8', (err2, r2) => {
+    fs.readFile('path', 'utf8', (err2, r2) => {
+    })
+  })
+})
+```
+### 3. 基于 then-fs 读取文件内容
 
+调用 then-fs 提供的 readFile() 方法，可以异步地读取文件的内容，它的返回值是 Promise 的实例对象。因
+此可以调用 .then() 方法为每个 Promise 异步操作指定成功和失败之后的回调函数。示例代码如下：
 
+```javascript
+import thenFs from 'then-fs'
+
+thenFs.readFile('./files/1.txt', 'utf8').then((r1) => {console.log(r1)})
+thenFs.readFile('./files/2.txt', 'utf8').then((r2) => {console.log(r2)})
+thenFs.readFile('./files/3.txt', 'utf8').then((r3) => {console.log(r3)})
+```
+### 4. 基于 Promise 按顺序读取文件的内容
+```javascript
+import thenFs from 'then-fs'
+
+thenFs
+.readFile('./files/11.txt', 'utf8')
+  .catch((err) => {
+    console.log(err.message)
+  })
+  .then((r1) => {
+    console.log(r1)
+    return thenFs.readFile('./files/2.txt', 'utf8')
+  })
+  .then((r2) => {
+    console.log(r2)
+    return thenFs.readFile('./files/3.txt', 'utf8')
+  })
+  .then((r3) => {
+    console.log(r3)
+  })
+```
+### 5. Promise.all() 方法
+在 `Promise.all()` 方法中，如果其中有一个 `Promise` 对象的状态变为 `rejected`，则整个方法立即停止执行，并且返回一个 `rejected` 状态的 `Promise` 对象，即使其它 `Promise `对象的状态是 `fulfilled`，也不会再执行 `.then()` 方法，直接进入 `.catch()` 方法中处理异常情况。
+因此，在使用 `Promise.all()` 方法时，需要确保其中的所有 `Promise` 对象都能够正常执行，以避免出现异常情况。
+
+```javascript
+import thenFs from 'then-fs'
+
+const promiseArr = [
+  thenFs.readFile('./files/3.txt', 'utf8'),
+  thenFs.readFile('./files/2.txt', 'utf8'),
+  thenFs.readFile('./files/1.txt', 'utf8'),
+]
+
+Promise.race(promiseArr).then(result => {
+  console.log(result)
+})
+```
+### 6 Promise.race() 方法
+Promise.race() 方法会发起并行的 Promise 异步操作，只要任何一个异步操作完成，就立即执行下一步的
+.then 操作（赛跑机制）。示例代码如下:
+```javascript
+import thenFs from 'then-fs'
+
+const promiseArr = [
+  thenFs.readFile('./files/3.txt', 'utf8'),
+  thenFs.readFile('./files/2.txt', 'utf8'),
+  thenFs.readFile('./files/1.txt', 'utf8'),
+]
+
+Promise.race(promiseArr).race(result => {
+  console.log(result)
+})
+```
+`Promise.all()` 和 `Promise.race()` 内部的异步操作是同时进行的，而不是顺序执行的。它们通过 JavaScript 的异步机制进行并行处理，即将异步操作放到 event loop 中，当异步操作完成时，通过回调函数返回结果。
+
+在 JavaScript 中，异步操作依赖于浏览器或者 `Node.js` 运行环境的支持。这些运行环境内部都维护了一个线程池用于执行异步任务，也就是说，JavaScript 本身并不会启动新的线程来执行异步任务。当我们需要执行大量异步任务时，线程池中的线程数量可能会变得不足以处理所有的任务，这时就有可能会出现线程饱和的情况，即某些异步任务需要等待其它任务执行完成后才能开始执行。这样就会导致异步操作的顺序执行，而非同时进行。
+
+具体而言，如果你有一万个异步操作需要执行，由于每个异步操作会占用一定的系统资源，因此无论是在浏览器环境还是在 `Node.js` 环境下，都需要考虑到系统的性能和资源消耗问题。如果同时启动一万个异步操作，系统可能会因为资源不足而崩溃或者变得极其缓慢，因此需要对任务进行适当分批执行，以避免系统资源瓶颈的产生。可以使用一些工具和库来实现任务分批执行，例如 `Node.js` 中的 `async` 和 `bluebird` 库。
+
+### 7 async/await 的基本使用
+```javascript
+import thenFs from 'then-fs'
+
+console.log('A')
+async function getAllFile() {
+  console.log('B')
+  const r1 = await thenFs.readFile('./files/1.txt', 'utf8')
+  console.log(r1)
+  const r2 = await thenFs.readFile('./files/2.txt', 'utf8')
+  console.log(r2)
+  const r3 = await thenFs.readFile('./files/3.txt', 'utf8')
+  console.log(r3)
+  console.log('D')
+}
+
+getAllFile()
+console.log('C')
+
+async function getAllFile() {
+  console.log('B')
+  const r1 =  thenFs.readFile('./files/1.txt', 'utf8')
+  console.log(r1)
+  const r2 =  thenFs.readFile('./files/2.txt', 'utf8')
+  console.log(r2)
+  const r3 =  thenFs.readFile('./files/3.txt', 'utf8')
+  console.log(r3)
+  console.log('D')
+}
+```
+代码会按照以下顺序输出内容：
+
+```
+A
+B
+C
+(1.txt 的内容)
+(2.txt 的内容)
+(3.txt 的内容)
+D
+```
+
+首先同步执行的部分会输出 `A` 和 `C`，然后调用 `getAllFile()` 函数。在函数内部，第一个 `await` 方法会执行文件读取操作，因为文件操作是异步的，所以代码会继续执行第二个和第三个 `await` 方法。当第一个文件读取操作执行完成之后，会输出第一个文件的内容，然后依次输出第二个和第三个文件的内容，最后输出 `D`。在整个过程中，函数内部的代码是按照顺序执行的，没有其他异步操作会干扰它的执行顺序。
+
+## 宏任务和微任务
+### 1. 什么是宏任务和微任务
+JavaScript 把异步任务又做了进一步的划分，异步任务又分为两类，分别是：
+① 宏任务（macrotask）
+- 异步 Ajax 请求、
+- setTimeout、setInterval、
+- 文件操作
+- 其它宏任务
+② 微任务（microtask）
+- Promise.then、.catch 和 .finally
+- process.nextTick
+- 其它微任务
+  
+每一个宏任务执行完之后，都会检查是否存在待执行的微任务，
+如果有，则执行完所有微任务之后，再继续执行下一个宏任务。
+
+## 打包
+webpack
+```javascript
+const path = require('path')
+
+// 1. 导入插件，得到构造函数
+const HtmlPlugin = require('html-webpack-plugin')
+// 2. 创建插件的实例对象
+const htmlPlugin = new HtmlPlugin({
+  template: './src/index.html',
+  filename: './index.html',
+})
+
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+const cleanPlugin = new CleanWebpackPlugin()
+
+module.exports = {
+  mode: 'development', // development  production
+  // eval-source-map 仅限在开发模式下使用
+  // devtool: 'eval-source-map',
+  // 生产环境下，建议关闭 SourceMap 或将 devtool 的值设置为 nosources-source-map
+  // devtool: 'nosources-source-map',
+  // devtool: 'source-map',
+  // 指定打包的入口
+  entry: path.join(__dirname, './src/index.js'),
+  // 指定打包的出口
+  output: {
+    // 表示输出文件的存放路径
+    path: path.join(__dirname, './dist'),
+    // 表示输出文件的名称
+    filename: 'js/bundle.js',
+  },
+  plugins: [htmlPlugin, cleanPlugin], // 3. 挂载插件的实例对象
+  devServer: {
+    open: true,
+    host: '127.0.0.1',
+    port: 80,
+  },
+  module: {
+    rules: [
+      { test: /\.css$/, use: ['style-loader', 'css-loader'] },
+      { test: /\.less$/, use: ['style-loader', 'css-loader', 'less-loader'] },
+      // { test: /\.jpg|png|gif$/, use: 'url-loader?limit=22228' }
+      {
+        test: /\.jpg|png|gif$/,
+        use: {
+          loader: 'url-loader',
+          options: {
+            limit: 22228,
+            outputPath: 'image',
+          },
+        },
+      },
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            plugins: ['@babel/plugin-proposal-class-properties'],
+          },
+        },
+      },
+    ],
+  },
+}
+```
