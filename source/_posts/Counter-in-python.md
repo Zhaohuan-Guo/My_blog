@@ -4,7 +4,7 @@ date: 2023-05-22 22:52:18
 tags:
     - python
 categories: python
-cover: https://www.ntuclearninghub.com/documents/39367/4216797/Python-Symbol.png/369e410e-a90f-f887-c2dc-61f7ef761476/
+cover: https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/1869px-Python-logo-notext.svg.png
 ---
 # 计数器的使用
 计数器对象（Counter）是 Python 标准库 collections 模块中的一个类，用于方便地进行计数操作。它提供了一种简单而高效的方式来统计可哈希对象（如字符串、列表、元组等）中元素的出现次数。
