@@ -298,4 +298,126 @@ app.listen(80, function () {
     ```
     **注意：错误级别的中间件，必须注册在所有路由之后！**
 5. Express 内置的中间件
+    自 Express 4.16.0 版本开始，Express 内置了 3 个常用的中间件，极大的提高了 Express 项目的开发效率和体验：
+    - express.static 快速托管静态资源的内置中间件，例如： HTML 文件、图片、CSS 样式等（无兼容性）
+    - express.json 解析 JSON 格式的请求体数据（有兼容性，仅在 4.16.0+ 版本中可用）
+    - express.urlencoded 解析 URL-encoded 格式的请求体数据（有兼容性，仅在 4.16.0+ 版本中可用
+    ```javascript
+        // 导入 express 模块
+    const express = require('express')
+    // 创建 express 的服务器实例
+    const app = express()
+
+    // 注意：除了错误级别的中间件，其他的中间件，必须在路由之前进行配置
+    // 通过 express.json() 这个中间件，解析表单中的 JSON 格式的数据
+    app.use(express.json())
+
+    // 通过 express.urlencoded() 这个中间件，来解析 表单中的 url-encoded 格式的数据
+    app.use(express.urlencoded({ extended: false }))
+
+    app.post('/user', (req, res) => {
+    // 在服务器，可以使用 req.body 这个属性，来接收客户端发送过来的请求体数据
+    // 默认情况下，如果不配置解析表单数据的中间件，则 req.body 默认等于 undefined
+    console.log(req.body)
+    res.send('ok')
+    })
+
+    app.post('/book', (req, res) => {
+    // 在服务器端，可以通过 req,body 来获取 JSON 格式的表单数据和 url-encoded 格式的数据
+    console.log(req.body)
+    res.send('ok')
+    })
+
+    // 调用 app.listen 方法，指定端口号并启动web服务器
+    app.listen(80, function () {
+    console.log('Express server running at http://127.0.0.1')
+    })
+    ```
 6. 第三方的中间件
+
+## 自定义中间件
+ 需求描述与实现步骤
+自己手动模拟一个类似于 express.urlencoded 这样的中间件，来解析 POST 提交到服务器的表单数据。
+实现步骤：
+1. 定义中间件
+2. 监听 req 的 data 事件
+3. 监听 req 的 end 事件
+4. 使用 querystring 模块解析请求体数据
+5. 将解析出来的数据对象挂载为 req.body
+6. 将自定义中间件封装为模块
+
+```javascript
+// 导入 express 模块
+const express = require('express')
+// 创建 express 的服务器实例
+const app = express()
+// 导入 Node.js 内置的 querystring 模块
+const qs = require('querystring')
+
+// 这是解析表单数据的中间件
+app.use((req, res, next) => {
+  // 定义中间件具体的业务逻辑
+  // 1. 定义一个 str 字符串，专门用来存储客户端发送过来的请求体数据
+  let str = ''
+  // 2. 监听 req 的 data 事件
+  req.on('data', (chunk) => {
+    str += chunk
+  })
+  // 3. 监听 req 的 end 事件
+  req.on('end', () => {
+    // 在 str 中存放的是完整的请求体数据
+    // console.log(str)
+    // TODO: 把字符串格式的请求体数据，解析成对象格式
+    const body = qs.parse(str)
+    req.body = body
+    next()
+  })
+})
+
+app.post('/user', (req, res) => {
+  res.send(req.body)
+})
+
+// 调用 app.listen 方法，指定端口号并启动web服务器
+app.listen(80, function () {
+  console.log('Express server running at http://127.0.0.1')
+})
+```
+# 使用 Express 写接口
+```javascript
+// 导入 express
+const express = require('express')
+// 创建服务器实例
+const app = express()
+
+// 配置解析表单数据的中间件
+app.use(express.urlencoded({ extended: false }))
+
+// 必须在配置 cors 中间件之前，配置 JSONP 的接口
+app.get('/api/jsonp', (req, res) => {
+  // TODO: 定义 JSONP 接口具体的实现过程
+  // 1. 得到函数的名称
+  const funcName = req.query.callback
+  // 2. 定义要发送到客户端的数据对象
+  const data = { name: 'zs', age: 22 }
+  // 3. 拼接出一个函数的调用
+  const scriptStr = `${funcName}(${JSON.stringify(data)})`
+  // 4. 把拼接的字符串，响应给客户端
+  res.send(scriptStr)
+})
+
+// 一定要在路由之前，配置 cors 这个中间件，从而解决接口跨域的问题
+const cors = require('cors')
+app.use(cors())
+
+// 导入路由模块
+const router = require('./16.apiRouter')
+// 把路由模块，注册到 app 上
+app.use('/api', router)
+
+// 启动服务器
+app.listen(80, () => {
+  console.log('express server running at http://127.0.0.1')
+})
+
+```
