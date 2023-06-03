@@ -421,3 +421,108 @@ app.listen(80, () => {
 })
 
 ```
+
+## 跨域问题
+刚才编写的 GET 和 POST接口，存在一个很严重的问题：不支持跨域请求。
+解决接口跨域问题的方案主要有两种：
+1. CORS（主流的解决方案，推荐使用）
+2. JSONP（有缺陷的解决方案：只支持 GET 请求）
+
+### CORS
+CORS （Cross-Origin Resource Sharing，跨域资源共享）由一系列 HTTP 响应头组成，**这些 HTTP 响应头决定浏览器是否阻止前端 JS 代码跨域获取资源**。
+浏览器的同源安全策略默认会阻止网页“跨域”获取资源。**但如果接口服务器配置了 CORS 相关的 HTTP 响应头，就可以解除浏览器端的跨域访问限制**。
+
+#### 注意事项：
+1. CORS 主要在服务器端进行配置。客户端浏览器无须做任何额外的配置，即可请求开启 CORS 的接口。
+2. CORS 在浏览器中有兼容性。只有支持 XMLHttpRequest Level2 的浏览器，才能正常访问开启了 CORS 的服
+务端接口（例如：IE10+、Chrome4+、FireFox3.5+）
+
+#### Access-Control-Allow-Origin
+CORS 响应头部 - Access-Control-Allow-Origin：
+响应头部中可以携带一个 Access-Control-Allow-Origin 字段：
+```javascript
+res.setHeader('Access-Control-Allow-Origin', 'http://itcast.cn')
+```
+
+默认情况下，CORS 仅支持客户端向服务器发送如下的 9 个请求头：
+Accept、Accept-Language、Content-Language、DPR、Downlink、Save-Data、Viewport-Width、Width 、Content-Type （值仅限于 text/plain、multipart/form-data、application/x-www-form-urlencoded 三者之一）
+
+#### others
+如果客户端向服务器发送了额外的请求头信息，则需要在服务器端，通过 Access-Control-Allow-Headers 对额外的请求头进行声明，否则这次请求会失败
+```javascript
+res.setHeader('Access-Control-Allow-Headers','Content-Type, X-Custom-Header')
+```
+
+同理，可以通过 **Access-Control-Allow-Methods** 设置**PUT，DELETE**等方法。
+
+#### CORS请求的分类
+简单请求
+同时满足以下两大条件的请求，就属于简单请求：
+1. 请求方式：GET、POST、HEAD 三者之一
+2. HTTP 头部信息不超过以下几种字段：无自定义头部字段、Accept、Accept-Language、Content-Language、DPR、Downlink、Save-Data、Viewport-Width、Width 、Content-Type（只有三个值application/x-www-form-urlencoded、multipart/form-data、text/plain）
+   
+预检请求
+只要符合以下任何一个条件的请求，都需要进行预检请求：
+1. 请求方式为 **GET、POST、HEAD 之外**的请求 Method 类型
+2. 请求头中**包含自定义头部字段**
+3. 向服务器发送了 **application/json** 格式的数据
+在浏览器与服务器正式通信之前，浏览器会先发送** OPTION **请求进行预检，以获知服务器是否允许该实际请求，所以这一
+次的 OPTION 请求称为“预检请求”。服务器成功响应预检请求后，才会发送真正的请求，并且携带真实数据。
+
+### JSONP 接口
+1. JSONP 不属于真正的 Ajax 请求，因为它没有使用 XMLHttpRequest 这个对象。
+2. JSONP 仅支持 GET 请求，不支持 POST、PUT、DELETE 等请求。
+
+如果项目中已经配置了 CORS 跨域资源共享，为了防止冲突，必须在配置 CORS 中间件之前声明 JSONP 的接口。**否则JSONP 接口会被处理成开启了 CORS 的接口。**
+
+在网页中使用 jQuery 发起 JSONP 请求:
+
+```javascript
+$(function () {
+        // 1. 测试GET接口
+        $('#btnGET').on('click', function () {
+          $.ajax({
+            type: 'GET',
+            url: 'http://127.0.0.1/api/get',
+            data: { name: 'zs', age: 20 },
+            success: function (res) {
+              console.log(res)
+            },
+          })
+        })
+        // 2. 测试POST接口
+        $('#btnPOST').on('click', function () {
+          $.ajax({
+            type: 'POST',
+            url: 'http://127.0.0.1/api/post',
+            data: { bookname: '水浒传', author: '施耐庵' },
+            success: function (res) {
+              console.log(res)
+            },
+          })
+        })
+
+        // 3. 为删除按钮绑定点击事件处理函数
+        $('#btnDelete').on('click', function () {
+          $.ajax({
+            type: 'DELETE',
+            url: 'http://127.0.0.1/api/delete',
+            success: function (res) {
+              console.log(res)
+            },
+          })
+        })
+
+        // 4. 为 JSONP 按钮绑定点击事件处理函数
+        $('#btnJSONP').on('click', function () {
+          $.ajax({
+            type: 'GET',
+            url: 'http://127.0.0.1/api/jsonp',
+            dataType: 'jsonp',
+            success: function (res) {
+              console.log(res)
+            },
+          })
+        })
+      })
+```
