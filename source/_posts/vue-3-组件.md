@@ -100,3 +100,166 @@ vue 官方提供了两种快速创建工程化的 SPA 项目的方式：
 - **script** -> 组件的 JavaScript 行为
 - **style** -> 组件的样式
 其中，每个组件中必须包含 template 模板结构，而 script 行为和 style 样式是可选的组成部分
+
+
+### 组件的 script 节点
+```vue
+<script>
+// 组件相关的data数据，methods方法等，都需要定义到 export default所导出的对象中
+export default {
+   name: 'MyApp',
+   data() { 
+      return {
+         count: 0,
+      }
+   },
+   method: {
+      addCount() {
+         this.count++
+      }
+   },
+}
+</script>
+```
+
+### 组件的 style 节点
+```vue
+<style lang = 'less'>
+h1 {
+   font-weight: normal;
+   i {
+      color: red;
+      font-style: normal;
+   }
+}
+</style>
+```
+
+# 组件的使用
+## 组件的注册
+vue 中组件的引用原则：**先注册后使用**
+
+vue 中注册组件的方式分为“全局注册”和“局部注册”两种，其中：
+- 被全局注册的组件，**可以在全局任何一个组件内使用**
+```js
+import {createApp} from 'vue'
+import App from './App.vue'
+
+//导入组件
+import Swiper from './components/MySwiper.vue'
+import Test from './components/MyTest.vue'
+
+const app = creatApp(App)
+
+//全局注册组件
+app.component('my-swiper', Swiper)
+app.component('my-test', Test)
+
+app.mount('#app')
+```
+使用 app.component() 方法注册的全局组件，直接以标签的形式进行使用即可，例如:
+```js
+<template>
+   <h1>这是App 根组件</h1>
+   <hr/>
+   <my-swiper></my-swiper>
+   <my-test></my-test>
+</template>
+```
+
+- 被局部注册的组件，**只能在当前注册的范围内使用**
+```js
+<template>
+   <h1>这是App 根组件</h1>
+   <hr/>
+   <my-swiper></my-swiper>
+   <my-test></my-test>
+</template>
+
+<script>
+   import Search from './components/MySearch.vue'
+   export default {
+      components {
+         'my-search': Search,
+      }
+   }
+</script>
+```
+
+## 通过 name 属性注册组件
+
+*在实际开发中，推荐使用**帕斯卡命名法（驼峰命名法）**为组件注册名称，因为它的适用性更强*
+
+在注册组件期间，除了可以直接提供组件的注册名称之外，还可以把组件的 name 属性作为注册后组件的名称
+
+```VUE
+<template>
+   <h3>this is a component<h3>
+</template>
+
+<script>
+export default {
+   name: 'MySwiper'
+}
+</script>
+```
+
+```js
+import Swiper from './components/MySwiper.vue'
+app.components(Swiper.name, Swiper)
+```
+## 组件之间的样式冲突问题
+默认情况下，写在 .vue 组件中的样式会全局生效，因此很容易造成多个组件之间的样式冲突问题。导致组件之间样式冲突的根本原因是：
+1. 单页面应用程序中，所有组件的 DOM 结构，都是基于**唯一的 index.html** 页面进行呈现的
+2. 每个组件中的样式，都会**影响整个 index.html 页面**中的 DOM 元素
+
+### 解决方案
+
+为每个组件分配唯一的自定义属性，在编写组件样式时，通过属性选择器来控制样式的作用域：
+```vue
+<template>
+   <div class="container" data-v-001>
+      <h3 data-v-001>轮播图组件</h3>
+   </div>
+</template>
+
+<style>
+   .container[data-v-001] {
+      border: 1px solid red;
+   }
+</style>
+```
+为了提高开发效率和开发体验，vue 为 style 节点提供了 scoped 属性，从而防止组件之间的样式冲突问题
+
+```vue
+<template>
+   <div class="container">
+      <h3>轮播图组件</h3>
+   </div>
+</template>
+
+<style scoped>
+   .container{
+      border: 1px solid red;
+   }
+</style>
+```
+
+### /deep/ 样式穿透
+如果给当前组件的 style 节点添加了 scoped 属性，则当前组件的样式对其子组件是不生效的。如果想让某些样式对子组件生效，**可以使用 /deep/ 深度选择器**。
+```vue
+<style lang='less' scoped>
+.title {
+   color: blue;
+}
+
+:deep() .title{
+   color: blue;
+}
+</style>
+```
+**注意：/deep/ 是 vue2.x 中实现样式穿透的方案。在 vue3.x 中推荐使用 :deep() 替代 /deep/。**
+
+
+## props
+props 是组件的自定义属性，组件的使用者可以通过 props 把数据传递到子组件内部，供子组件内部进行使用。
